@@ -38,31 +38,27 @@ export const loginWithAccessToken = async (
   setStoreData: (storeData: StoreData) => void,
   setToken: (token: string | null) => void
 ): Promise<boolean> => {
-  // Change return type to Promise<boolean>
-//   const router = useRouter();
   try {
-    const response: { status: number, data: { status: number; storeData: StoreData } } =
-      await api({
-        url: "/store/verify-access-token",
-        type: "get",
-        data: { accessToken },
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-    console.log(response, "response");
+    const response: {
+      status: number;
+      data: { status: number; storeData: StoreData };
+    } = await api({
+      url: "/store/verify-access-token",
+      type: "get",
+      data: { accessToken },
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
     const data = response.data;
     if (response.status === 200) {
       setStoreData(data.storeData);
       setToken(accessToken);
-    //   router.push("/store-dashboard");
       return true; // Token is valid
     } else {
-    //   router.push("/");
       return false; // Token is invalid
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return false; // In case of an error (e.g., network error, invalid token)
   }
 };
