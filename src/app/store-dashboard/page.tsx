@@ -12,16 +12,14 @@ const StoreDashboard = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [filters, setFilters] = useState({ from: "", to: "", aggregator: "" });
   const [sortBy, setSortBy] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const router = useRouter();
 
   useEffect(() => {
     const isUserLoggedIn = async () => {
       const accessToken = localStorage.getItem("jwtToken");
-      console.log(accessToken, "accessToken");
-
       if (!accessToken) {
-        console.log("No token found, redirecting to login.");
         return router.push("/");
       }
 
@@ -31,11 +29,7 @@ const StoreDashboard = () => {
         setToken
       );
 
-      if (userValid) {
-        console.log("User is valid, redirecting to dashboard.");
-        router.push("/store-dashboard");
-      } else {
-        console.log("Invalid token, redirecting to login.", userValid);
+      if (!userValid) {
         router.push("/");
       }
     };
@@ -44,7 +38,6 @@ const StoreDashboard = () => {
   }, [router, setStoreData, setToken]);
 
   useEffect(() => {
-    console.log("Token:", token);
     if (token) {
       fetchOrders();
     }
@@ -58,8 +51,8 @@ const StoreDashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data: any = response.data;
       if (response.status === 200) {
+        const data: any = response.data;
         setOrders(data.ordersAssociated);
         setFilteredOrders(data.ordersAssociated);
       } else {
@@ -70,46 +63,32 @@ const StoreDashboard = () => {
     }
   };
 
-  //   const handleFilterChange = (e) => {
-  //     setFilters({ ...filters, [e.target.name]: e.target.value });
-  //   };
+  const handleSort = (field: any) => {
+    const order = sortOrder === "asc" ? "desc" : "asc";
+    setSortOrder(order);
+    setSortBy(field);
 
-  //   const applyFilters = () => {
-  //     let result = [...orders];
-  //     if (filters.from && filters.to) {
-  //       result = result.filter(
-  //         (order) =>
-  //           new Date(order.date) >= new Date(filters.from) &&
-  //           new Date(order.date) <= new Date(filters.to)
-  //       );
-  //     }
-  //     if (filters.aggregator) {
-  //       result = result.filter(
-  //         (order) => order.aggregator === filters.aggregator
-  //       );
-  //     }
-  //     setFilteredOrders(result);
-  //   };
+    const sortedOrders = [...filteredOrders].sort((a, b) => {
+      const valA = field === "deliveryTime" ? new Date(a[field]) : a[field];
+      const valB = field === "deliveryTime" ? new Date(b[field]) : b[field];
 
-  //   const handleSort = (field) => {
-  //     const sortedOrders = [...filteredOrders].sort((a, b) =>
-  //       field === "date"
-  //         ? new Date(a[field]) - new Date(b[field])
-  //         : a[field] - b[field]
-  //     );
-  //     setFilteredOrders(sortedOrders);
-  //     setSortBy(field);
-  //   };
+      if (valA < valB) return order === "asc" ? -1 : 1;
+      if (valA > valB) return order === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    setFilteredOrders(sortedOrders);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center px-6 py-14">
       <div className="max-w-6xl w-full">
         <h1 className="text-3xl font-bold text-yellow-300 mb-6 text-center">
           Store Dashboard: {storeData?.name}
         </h1>
-        <div className="flex gap-4 mb-4">
-          {/* Filters */}
-          <input
+         {/* Filters */}
+         <div className="flex space-x-4 mb-4">
+         <input
             type="date"
             name="from"
             value={filters.from}
@@ -134,38 +113,43 @@ const StoreDashboard = () => {
             Apply Filters
           </button>
         </div>
-
-        {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse border border-gray-700">
             <thead>
               <tr className="bg-gray-800">
-                <th className="p-4 border border-gray-700 text-yellow-300">
-                  Store ID
+                <th className="p-4 border border-gray-700 text-yellow-300">Order ID</th>
+                <th className="p-4 border border-gray-700 text-yellow-300">Items</th>
+                <th className="p-4 border border-gray-700 text-yellow-300">Aggregator</th>
+                <th
+                  className="p-4 border border-gray-700 text-yellow-300 cursor-pointer"
+                  onClick={() => handleSort("netAmount")}
+                >
+                  Net Amount {sortBy === "netAmount" && (sortOrder === "asc" ? "▲" : "▼")}
                 </th>
-                <th className="p-4 border border-gray-700 text-yellow-300">
-                  Items
+                <th
+                  className="p-4 border border-gray-700 text-yellow-300 cursor-pointer"
+                  onClick={() => handleSort("grossAmount")}
+                >
+                  Gross Amount {sortBy === "grossAmount" && (sortOrder === "asc" ? "▲" : "▼")}
                 </th>
-                <th className="p-4 border border-gray-700 text-yellow-300">
-                  Aggregator
+                <th
+                  className="p-4 border border-gray-700 text-yellow-300 cursor-pointer"
+                  onClick={() => handleSort("tax")}
+                >
+                  Tax {sortBy === "tax" && (sortOrder === "asc" ? "▲" : "▼")}
                 </th>
-                <th className="p-4 border border-gray-700 text-yellow-300">
-                  Net Amount
+                <th
+                  className="p-4 border border-gray-700 text-yellow-300 cursor-pointer"
+                  onClick={() => handleSort("discount")}
+                >
+                  Discounts {sortBy === "discount" && (sortOrder === "asc" ? "▲" : "▼")}
                 </th>
-                <th className="p-4 border border-gray-700 text-yellow-300">
-                  Gross Amount
-                </th>
-                <th className="p-4 border border-gray-700 text-yellow-300">
-                  Tax
-                </th>
-                <th className="p-4 border border-gray-700 text-yellow-300">
-                  Discounts
-                </th>
-                <th className="p-4 border border-gray-700 text-yellow-300">
-                  Status
-                </th>
-                <th className="p-4 border border-gray-700 text-yellow-300">
-                  Delivery Time
+                <th className="p-4 border border-gray-700 text-yellow-300">Status</th>
+                <th
+                  className="p-4 border border-gray-700 text-yellow-300 cursor-pointer"
+                  onClick={() => handleSort("deliveryTime")}
+                >
+                  Delivery Time {sortBy === "deliveryTime" && (sortOrder === "asc" ? "▲" : "▼")}
                 </th>
               </tr>
             </thead>
@@ -176,7 +160,7 @@ const StoreDashboard = () => {
                   className="odd:bg-gray-800 even:bg-gray-700 text-center"
                 >
                   <td className="p-4 border border-gray-700 text-green-400">
-                    {order.storeId}
+                    {order._id.substring(order._id.length - 5)}
                   </td>
                   <td className="p-4 border border-gray-700">
                     {order.items.join(", ")}

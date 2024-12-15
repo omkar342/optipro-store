@@ -43,13 +43,16 @@ const LoginPage = () => {
     }
   };
 
+  const handleSampleCreds = () => {
+    setuserName("storeA");
+    setPassword("storeA");
+  };
+
   useEffect(() => {
     const isUserLoggedIn = async () => {
       const accessToken = localStorage.getItem("jwtToken");
-      console.log(accessToken, "accessToken");
 
       if (!accessToken) {
-        console.log("No token found, redirecting to login.");
         return router.push("/");
       }
 
@@ -60,10 +63,8 @@ const LoginPage = () => {
       );
 
       if (userValid) {
-        console.log("User is valid, redirecting to dashboard.");
         router.push("/store-dashboard");
       } else {
-        console.log("Invalid token, redirecting to login.", userValid);
         router.push("/");
       }
     };
@@ -115,6 +116,13 @@ const LoginPage = () => {
               Login
             </button>
           </form>
+          <button
+            type="button"
+            onClick={handleSampleCreds}
+            className="w-full mt-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          >
+            Use Sample Creds
+          </button>
         </div>
       </div>
       {/* Footer */}
