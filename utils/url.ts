@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
 // Define the base URL for the API
-// export const baseURL = "https://optipro-backend.onrender.com/";
-export const baseURL = "http://localhost:3002/";
+export const baseURL = "https://optipro-backend.onrender.com/";
+// export const baseURL = "http://localhost:3002/";
 
 // Create an Axios instance with the base URL
 const Axios: AxiosInstance = axios.create({
